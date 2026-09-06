@@ -119,6 +119,36 @@ CREATE TABLE IF NOT EXISTS notices (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS chapters (
+  id SERIAL PRIMARY KEY,
+  subject_id INTEGER NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  display_order INTEGER DEFAULT 0,
+  is_published BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS lessons (
+  id SERIAL PRIMARY KEY,
+  chapter_id INTEGER NOT NULL REFERENCES chapters(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  video_url VARCHAR(1000),
+  notes_file_path VARCHAR(500),
+  display_order INTEGER DEFAULT 0,
+  is_published BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_chapters_subject
+  ON chapters(subject_id);
+
+CREATE INDEX IF NOT EXISTS idx_lessons_chapter
+  ON lessons(chapter_id);
+
 CREATE TABLE IF NOT EXISTS assignments (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -162,3 +192,22 @@ CREATE INDEX IF NOT EXISTS idx_attendance_student ON attendance(student_id);
 CREATE INDEX IF NOT EXISTS idx_students_class ON students(class_id, section_id);
 CREATE INDEX IF NOT EXISTS idx_marks_student ON marks(student_id);
 CREATE INDEX IF NOT EXISTS idx_fees_student ON fees(student_id);
+
+CREATE TABLE IF NOT EXISTS banners (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  subtitle TEXT,
+  badge_text VARCHAR(100),
+  button_text VARCHAR(100),
+  button_link VARCHAR(500),
+  image_url VARCHAR(1000),
+  background_color VARCHAR(100),
+  is_active BOOLEAN DEFAULT TRUE,
+  display_order INTEGER DEFAULT 0,
+  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_banners_active_order
+  ON banners(is_active, display_order);

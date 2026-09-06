@@ -11,7 +11,7 @@ const PORT = parseInt(process.env.PORT || '5478');
 
 // Ensure upload dirs
 const upDir = path.resolve(process.env.UPLOAD_DIR || './uploads');
-['assignments', 'submissions', 'avatars'].forEach((d) => {
+['assignments', 'submissions', 'avatars', 'learning', 'banners'].forEach((d) => {
   const p = path.join(upDir, d);
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 });
@@ -44,6 +44,8 @@ app.use('/api/notices', require('./routes/notices'));
 app.use('/api/assignments', require('./routes/assignments'));
 app.use('/api/timetable', require('./routes/timetable'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/learning-content', require('./routes/learningContent'));
+app.use('/api/banners', require('./routes/banners'));
 
 // Serve frontend build
 const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
