@@ -2,6 +2,7 @@ import React from 'react'
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Image as ImageIcon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import api from '../lib/api'
 
 const emptyForm = {
   title: '',
@@ -33,19 +34,8 @@ export default function Banners() {
       setLoading(true)
       setError('')
 
-      const res = await fetch('/api/banners/admin', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to load banners')
-      }
-
-      setBanners(data)
+      const res = await api.get('/banners/admin')
+      setBanners(res.data)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -112,22 +102,16 @@ export default function Banners() {
 
       const method = editingId ? 'PUT' : 'POST'
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      if (editingId) {
+        await api.put(`/banners/${editingId}`, {
           ...form,
           display_order: Number(form.display_order) || 0,
-        }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to save banner')
+        })
+      } else {
+        await api.post('/banners', {
+          ...form,
+          display_order: Number(form.display_order) || 0,
+        })
       }
 
       await loadBanners()
@@ -145,19 +129,7 @@ export default function Banners() {
     try {
       setError('')
 
-      const res = await fetch(`/api/banners/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to delete banner')
-      }
-
+      await api.delete(`/banners/${id}`)
       await loadBanners()
     } catch (err) {
       setError(err.message)
@@ -327,21 +299,8 @@ export default function Banners() {
                         const formData = new FormData()
                         formData.append('image', file)
 
-                        const res = await fetch('/api/banners/upload', {
-                          method: 'POST',
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                          },
-                          body: formData,
-                        })
-
-                        const data = await res.json()
-
-                        if (!res.ok) {
-                          throw new Error(data.error || 'Failed to upload image')
-                        }
-
-                        updateField('image_url', data.image_url)
+                        const res = await api.post('/banners/upload', formData)
+                        updateField('image_url', res.data.image_url)
                       } catch (err) {
                         setError(err.message)
                       } finally {

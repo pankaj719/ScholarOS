@@ -1,5 +1,5 @@
 import axios from 'axios'
-const api = axios.create({ baseURL: '/api' })
+const api = axios.create({ baseURL: 'https://heating-temporarily-essentially-difficulty.trycloudflare.com/api' })
 api.interceptors.request.use((c) => {
   const t = localStorage.getItem('hm_token')
   if (t) c.headers.Authorization = `Bearer ${t}`
