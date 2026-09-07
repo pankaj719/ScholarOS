@@ -21,6 +21,7 @@ function StudentHome({ user }) {
   const [stats, setStats] = useState({})
   const [banners, setBanners] = useState([])
   const [bannerDebug, setBannerDebug] = useState('Checking banner API...')
+  const [bannerImages, setBannerImages] = useState({})
 
   useEffect(() => {
     api.get('/dashboard/stats')
@@ -39,6 +40,48 @@ function StudentHome({ user }) {
         setBanners([])
       })
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    const objectUrls = []
+
+    banners.forEach(async (banner) => {
+      if (!banner.image_url) return
+
+      try {
+        const url = banner.image_url.startsWith('http')
+          ? banner.image_url
+          : `https://heating-temporarily-essentially-difficulty.trycloudflare.com${banner.image_url}`
+
+        const response = await fetch(url)
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+
+        const blob = await response.blob()
+        const objectUrl = URL.createObjectURL(blob)
+        objectUrls.push(objectUrl)
+
+        if (!cancelled) {
+          setBannerImages(prev => ({
+            ...prev,
+            [banner.id]: objectUrl
+          }))
+        }
+      } catch (err) {
+        console.error('BANNER BLOB LOAD FAILED:', err)
+        if (!cancelled) {
+          setBannerDebug(`Image failed: ${err.message}`)
+        }
+      }
+    })
+
+    return () => {
+      cancelled = true
+      objectUrls.forEach(url => URL.revokeObjectURL(url))
+    }
+  }, [banners])
 
   const quickItems = [
     { title: 'My Courses', icon: BookOpen, to: '/app/classes' },
@@ -85,13 +128,13 @@ function StudentHome({ user }) {
         {banners.filter(banner => banner.image_url).map((banner) => (
           <section key={banner.id} className="pt-5">
             <div className="relative overflow-hidden rounded-3xl shadow-xl">
-              <img
-                src={banner.image_url.startsWith('http')
-                  ? banner.image_url
-                  : `https://heating-temporarily-essentially-difficulty.trycloudflare.com${banner.image_url}`}
-                alt={banner.title || 'Banner'}
-                className="block w-full h-auto object-cover"
-              />
+              {bannerImages[banner.id] && (
+                <img
+                  src={bannerImages[banner.id]}
+                  alt={banner.title || 'Banner'}
+                  className="block w-full h-auto object-cover"
+                />
+              )}
             </div>
           </section>
         ))}
