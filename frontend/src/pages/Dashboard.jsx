@@ -81,35 +81,20 @@ function StudentHome({ user }) {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6">
 
-        {/* TEMP BANNER DEBUG */}
-        <div className="mx-4 mt-4 rounded-xl bg-yellow-100 p-3 text-sm font-bold text-black">
-          {bannerDebug}
-        </div>
-
         {/* Student Dashboard Banners */}
-        {banners.some(banner => banner.image_url) && (
-          <section className="pt-5 space-y-4">
-            {banners
-              .filter(banner => banner.image_url)
-              .map((banner) => (
-                <div
-                  key={banner.id}
-                  className="relative overflow-hidden rounded-3xl shadow-xl"
-                >
-                  <img
-                    src={`https://heating-temporarily-essentially-difficulty.trycloudflare.com${banner.image_url}`}
-                    alt={banner.title || 'Banner'}
-                    className="block w-full h-auto object-cover"
-                    onLoad={() => console.log('BANNER IMAGE LOADED:', banner.image_url)}
-                    onError={(e) => {
-                      console.error('BANNER IMAGE FAILED:', e.currentTarget.src)
-                      setBannerDebug(`Image failed: ${e.currentTarget.src}`)
-                    }}
-                  />
-                </div>
-              ))}
+        {banners.filter(banner => banner.image_url).map((banner) => (
+          <section key={banner.id} className="pt-5">
+            <div className="relative overflow-hidden rounded-3xl shadow-xl">
+              <img
+                src={banner.image_url.startsWith('http')
+                  ? banner.image_url
+                  : `https://heating-temporarily-essentially-difficulty.trycloudflare.com${banner.image_url}`}
+                alt={banner.title || 'Banner'}
+                className="block w-full h-auto object-cover"
+              />
+            </div>
           </section>
-        )}
+        ))}
 
         {/* Explore */}
         <section className="mt-7">
